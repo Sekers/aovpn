@@ -45,6 +45,14 @@ If ($null -eq $Connections)
     Exit
 }
 
+# Remove Users With Connections Exceeding the Value of MaxAge
+Write-Verbose "Disconnecting VPN connections older than $MaxAge seconds..."
+Foreach ($User in $Connections)
+{
+    Write-Verbose ("" + $User.Username + " (" + $User.ClientIPAddress.IPAddressToString + ")")
+    Disconnect-VpnUser -HostIPAddress $User.ClientIPAddress.IPAddressToString
+}
+
 # Get Connections (All) and Unique Users in This List
 $Connections = Get-RemoteAccessConnectionStatistics | Select-Object Username, ClientIPAddress, ConnectionDuration
 $UniqueUsers = $Connections | Select-Object Username | Sort-Object -Unique Username 
