@@ -1,16 +1,29 @@
 <#
+
 .SYNOPSIS
     PowerShell script to remove stale VPN connections.
+
 .PARAMETER MaxAge
     The value in seconds to remove VPN connections older than. The minimum accepted value is 3600 (1 hour). The default is 86400 (24 hours).
+
 .EXAMPLE
     .\Remove-VpnConnections -MaxAge 28800
+
 .DESCRIPTION
-    It is not uncommon for Windows Server Routing and Remote Access Service (RRAS) servers to maintain device tunnel VPN connections long after the device has disconnected. This PowerShell script can be used to remove those stale connections.
+    It is not uncommon for Windows Server Routing and Remote Access Service (RRAS) servers to maintain VPN connections long after the user has disconnected. This PowerShell script can be used to remove those stale connections.
+
 .LINK
-    https://github.com/richardhicks/aovpn/blob/master/Remove-VpnConnections.ps1
+    https://directaccess.richardhicks.com/
+
 .NOTES
-    Modified by LFCDS to fix some issues (see https://github.com/richardhicks/aovpn/issues/9) and then also added in some code (https://github.com/Sekers/aovpn/blob/patch-1/Remove-VpnConnections.ps1) to remove duplicate entries no matter the age, keeping the newest connection.
+    Version:        1.0
+    Creation Date:  April 14, 2020
+    Last Updated:   April 14, 2020
+    Author:         Richard Hicks
+    Organization:   Richard M. Hicks Consulting, Inc.
+    Contact:        rich@richardhicks.com
+    Web Site:       https://directaccess.richardhicks.com/
+
 #>
 
 [CmdletBinding()]
@@ -22,15 +35,14 @@ Param(
 
 )
 
-# Get Connections (Older Than the Max Age)
+# Get Connections Older Than the Max Age
 $Connections = Get-RemoteAccessConnectionStatistics | Where-Object ConnectionDuration -ge $MaxAge | Select-Object Username, ClientIPAddress | Sort-Object UserName
 
-# Remove Users With Connections Exceeding the Value of MaxAge
-Write-Verbose "Disconnecting VPN connections older than $MaxAge seconds..."
-Foreach ($User in $Connections)
+# If no Connections Exceed the Value of MaxAge, Exit the Script
+If ($null -eq $Connections)
 {
-    Write-Verbose ("" + $User.Username + " (" + $User.ClientIPAddress.IPAddressToString + ")")
-    Disconnect-VpnUser -HostIPAddress $User.ClientIPAddress.IPAddressToString
+    Write-Warning "No connections exceeding $MaxAge seconds. Exiting script."
+    Exit
 }
 
 # Get Connections (All) and Unique Users in This List
