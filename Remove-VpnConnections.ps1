@@ -38,13 +38,6 @@ Param(
 # Get Connections Older Than the Max Age
 $Connections = Get-RemoteAccessConnectionStatistics | Where-Object ConnectionDuration -ge $MaxAge | Select-Object Username, ClientIPAddress | Sort-Object UserName
 
-# If no Connections Exceed the Value of MaxAge, Exit the Script
-If ($null -eq $Connections)
-{
-    Write-Warning "No connections exceeding $MaxAge seconds. Exiting script."
-    Exit
-}
-
 # Remove Users With Connections Exceeding the Value of MaxAge
 Write-Verbose "Disconnecting VPN connections older than $MaxAge seconds..."
 Foreach ($User in $Connections)
