@@ -49,7 +49,7 @@ If ($null -eq $Connections)
 Write-Verbose "Disconnecting VPN connections older than $MaxAge seconds..."
 Foreach ($User in $Connections)
 {
-    Write-Host ("" + $User.Username + " (" + $User.ClientIPAddress.IPAddressToString + ")")
+    Write-Verbose ("" + $User.Username + " (" + $User.ClientIPAddress.IPAddressToString + ")")
     Disconnect-VpnUser -HostIPAddress $User.ClientIPAddress.IPAddressToString
 }
 
@@ -60,7 +60,7 @@ $UniqueUsers = $Connections | Select-Object Username | Sort-Object -Unique Usern
 # Disconnect Oldest Duplicate Device Names, Leaving Only the Newset One
 Foreach ($User in $UniqueUsers)
 {
-    Write-Host "------------------------------------------"
+    Write-Verbose "------------------------------------------"
     
     #Get Matching Connections Sorted by connectionduration Ascending
     $UserConnections = $Connections | Where-Object {$_.Username -eq $User.Username} | Sort-Object ConnectionDuration
@@ -69,11 +69,11 @@ Foreach ($User in $UniqueUsers)
     {
         if ($Count -eq 0) # Keep the Newest Item
         {
-            Write-Host ("Keeping: " + $UserConnection.Username + " (" + $UserConnection.ClientIPAddress.IPAddressToString + ", " + $UserConnection.ConnectionDuration + ")")
+            Write-Verbose ("Keeping: " + $UserConnection.Username + " (" + $UserConnection.ClientIPAddress.IPAddressToString + ", " + $UserConnection.ConnectionDuration + ")")
         }
         else
         {   
-            Write-Host ("Removing: " + $UserConnection.Username + " (" + $UserConnection.ClientIPAddress.IPAddressToString + ", " + $UserConnection.ConnectionDuration + ")")
+            Write-Verbose ("Removing: " + $UserConnection.Username + " (" + $UserConnection.ClientIPAddress.IPAddressToString + ", " + $UserConnection.ConnectionDuration + ")")
             Disconnect-VpnUser -HostIPAddress $UserConnection.ClientIPAddress.IPAddressToString
         }
         $Count += 1
